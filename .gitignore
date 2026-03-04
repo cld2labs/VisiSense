@@ -1,0 +1,179 @@
+# =================================================================
+# VisiSense - CatalogIQ .gitignore
+# =================================================================
+
+# Environment Variables (CRITICAL - Contains API Keys)
+.env
+.env.local
+.env.*.local
+backend/.env
+frontend/.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+venv/
+ENV/
+env/
+.venv
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Node.js / Frontend
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.pnpm-store/
+
+# Build outputs
+dist/
+dist-ssr/
+*.local
+frontend/dist/
+frontend/build/
+
+# Frontend cache
+.vite/
+.cache/
+
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*~
+
+# Docker
+*.log
+.dockerignore
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Testing
+coverage/
+*.cover
+.hypothesis/
+
+# Temporary files
+*.swp
+*.swo
+*.tmp
+*.temp
+.tmp/
+
+# Editor backups
+*~
+*.bak
+*.orig
+
+# Session data
+sessions/
+*.session
+
+# Uploaded files (if storing locally)
+uploads/
+temp_uploads/
+
+# macOS
+.AppleDouble
+.LSOverride
+
+# Windows
+desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+.directory
+.Trash-*
+
+# Secrets and credentials
+secrets/
+credentials/
+*.pem
+*.key
+*.cert
+*.crt
+id_rsa
+id_rsa.pub
+
+# API keys and tokens
+*_token.txt
+*_key.txt
+*.env.backup
+
+# IDEs
+*.sublime-project
+*.sublime-workspace
+.nova/
+
+# Compiled files
+*.pyc
+*.pyo
+*.class
+
+# Package files
+*.tar.gz
+*.zip
+*.rar
+
+# Misc
+.eslintcache
