@@ -1,0 +1,76 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: visisense-backend
+    ports:
+      - "8001:8000"
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend:/app
+    networks:
+      - app_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: visisense-frontend
+    ports:
+      - "5173:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - app_network
+    restart: unless-stopped
+
+networks:
+  app_network:
+    driver: bridge
+
+# =============================================================================
+# Usage Instructions:
+# =============================================================================
+#
+# 1. Copy .env.example to backend/.env and configure your LLM provider:
+#    cp .env.example backend/.env
+#    # Edit backend/.env with your provider (OpenAI, Groq, Ollama, etc.)
+#
+# 2. Start the application:
+#    docker compose up -d
+#
+# 3. Access the application:
+#    - Frontend: http://localhost:5173
+#    - Backend API: http://localhost:8001
+#    - API Docs: http://localhost:8001/docs
+#
+# 4. View logs:
+#    docker compose logs -f
+#
+# 5. Stop the application:
+#    docker compose down
+#
+# =============================================================================
+# Multi-Provider Support:
+# =============================================================================
+#
+# This application supports multiple LLM providers:
+# - OpenAI (gpt-4o, gpt-4-turbo)
+# - Groq (llama-3.2-90b-vision-preview - Fast & Free tier)
+# - Ollama (qwen2.5-vl:7b, llama3.2-vision - Local/Private)
+# - OpenRouter (Multiple models via single API)
+# - Any OpenAI-compatible API
+#
+# See .env.example for configuration examples for each provider.
+#
+# =============================================================================
