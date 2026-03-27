@@ -59,7 +59,7 @@ class VisionClient:
 
         try:
             logger.info(f"Sending vision analysis request with {len(images)} image(s)")
-            async with httpx.AsyncClient(timeout=settings.REQUEST_TIMEOUT) as client:
+            async with httpx.AsyncClient(timeout=settings.REQUEST_TIMEOUT, verify=settings.VERIFY_SSL) as client:
                 response = await client.post(
                     f"{settings.LLM_BASE_URL}/chat/completions",
                     json=payload,
@@ -105,7 +105,7 @@ class VisionClient:
 
         try:
             logger.info("Sending chat completion request")
-            async with httpx.AsyncClient(timeout=settings.REQUEST_TIMEOUT) as client:
+            async with httpx.AsyncClient(timeout=settings.REQUEST_TIMEOUT, verify=settings.VERIFY_SSL) as client:
                 response = await client.post(
                     f"{settings.LLM_BASE_URL}/chat/completions",
                     json=payload,

@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings
 from typing import Optional
+import os
 
 
 class Settings(BaseSettings):
@@ -30,6 +31,10 @@ class Settings(BaseSettings):
 
     PYTHON_ENV: str = "development"
 
+    # SSL Verification Settings
+    # Set to False for environments with self-signed certificates (e.g., Xeon machines without SSL certs)
+    VERIFY_SSL: bool = True
+
     class Config:
         env_file = ".env"
         case_sensitive = True
@@ -37,3 +42,9 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+# Override VERIFY_SSL from environment variable if present
+# This allows for flexibility when VERIFY_SSL is set as a string in .env
+verify_ssl_env = os.getenv("VERIFY_SSL", "true").lower()
+if verify_ssl_env in ["false", "0", "no"]:
+    settings.VERIFY_SSL = False

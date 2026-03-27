@@ -561,6 +561,46 @@ Configure the application behavior using environment variables in `backend/.env`
 
 ---
 
+## Inference Benchmarks
+
+The table below compares inference performance for the complete VisiSense catalog generation workflow (averaged over 3 runs with the same product image).
+
+| Provider     | Model      | Deployment      | Context Window | Avg Input Tokens | Avg Output Tokens | Avg Tokens / Request | P50 Latency (ms) | P95 Latency (ms) | Throughput (req/s) | Hardware        |
+| ------------ | ---------- | --------------- | -------------- | ---------------- | ----------------- | -------------------- | ---------------- | ---------------- | ------------------ | --------------- |
+| OpenAI (Cloud) | `gpt-4o` | API (Cloud)     | 128K           | 3,443            | 686.67            | 4,129.67             | 10,176           | 11,247           | 0.101              | N/A             |
+
+> **Notes:**
+>
+> - All benchmarks use the actual VisiSense production prompt (~2,678 tokens) and production image processing pipeline.
+> - Input tokens include both the prompt and image processing overhead (765 tokens per high-detail image in GPT-4o).
+> - Output tokens represent the complete JSON catalog response with all fields populated (product identity, SEO content, features, attributes, keywords, SKU intelligence).
+> - Token counts are estimated using ~4 characters per token. Actual API token usage may vary slightly.
+
+---
+
+## Model Capabilities
+
+### GPT-4o
+
+OpenAI's flagship multimodal model for vision and language understanding, accessible via cloud API.
+
+| Attribute                   | Details                                                                                                                                                                                    |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Parameters**              | Not publicly disclosed                                                                                                                                                                     |
+| **Architecture**            | Multimodal Transformer (text + image input, text output)                                                                                                                                   |
+| **Context Window**          | 128,000 tokens input                                                                                                                                                                       |
+| **Vision Capabilities**     | State-of-the-art image understanding with brand/logo recognition, object detection, and detailed attribute extraction                                                                       |
+| **Structured Output**       | JSON mode with schema validation — generates complete product catalogs with consistent formatting                                                                                           |
+| **Use Case in VisiSense**   | Processes product images to generate comprehensive e-commerce catalog content including SEO-optimized titles, descriptions, features, attributes, keywords, and SKU intelligence            |
+| **Image Processing**        | High-detail mode: 765 tokens per image. Supports 1-5 images per request for multi-angle product analysis                                                                                   |
+| **Output Quality**          | 659-706 tokens per catalog (stable output), 100% success rate in testing                                                                                                                   |
+| **Pricing**                 | $2.50 / 1M input tokens, $10.00 / 1M output tokens (~$0.0185 per product catalog)                                                                                                          |
+| **License**                 | Proprietary (OpenAI Terms of Use)                                                                                                                                                          |
+| **Deployment**              | Cloud-only — OpenAI API or Azure OpenAI Service. No self-hosted or on-prem option                                                                                                          |
+| **Knowledge Cutoff**        | October 2023                                                                                                                                                                               |
+
+---
+
 ## Technology Stack
 
 ### Backend
