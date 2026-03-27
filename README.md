@@ -2,47 +2,98 @@
   <img src="docs/assets/InnovationHub-HeaderImage.png" width="800" alt="VisiSense CatalogIQ">
 </p>
 
-# 🛍️ VisiSense - CatalogIQ
+# VisiSense — CatalogIQ
 
-AI-powered visual product intelligence for retail merchandising teams using multi-provider vision models.
+AI-powered visual product intelligence platform that converts product images into comprehensive retail catalog content. Upload images, select your LLM provider, and generate SEO-optimized titles, descriptions, attributes, and keywords using state-of-the-art vision models — powered by any OpenAI-compatible API or a locally running Ollama model.
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
-- [Project Overview](#project-overview)
-- [Architecture](#architecture)
-- [Get Started](#get-started)
-  - [Prerequisites](#prerequisites)
-  - [Quick Start](#quick-start)
-- [Project Structure](#project-structure)
-- [Usage Guide](#usage-guide)
-- [LLM Provider Configuration](#llm-provider-configuration)
-- [Environment Variables](#environment-variables)
-- [Technology Stack](#technology-stack)
-- [Troubleshooting](#troubleshooting)
-- [License](#license)
+- [VisiSense — CatalogIQ](#visisense--catalogiq)
+  - [Table of Contents](#table-of-contents)
+  - [Project Overview](#project-overview)
+  - [How It Works](#how-it-works)
+  - [Architecture](#architecture)
+    - [Architecture Diagram](#architecture-diagram)
+    - [Architecture Components](#architecture-components)
+    - [Service Components](#service-components)
+    - [Typical Flow](#typical-flow)
+  - [Get Started](#get-started)
+    - [Prerequisites](#prerequisites)
+      - [Verify Installation](#verify-installation)
+    - [Quick Start (Docker Deployment)](#quick-start-docker-deployment)
+      - [1. Clone the Repository](#1-clone-the-repository)
+      - [2. Configure the Environment](#2-configure-the-environment)
+      - [3. Build and Start the Application](#3-build-and-start-the-application)
+      - [4. Access the Application](#4-access-the-application)
+      - [5. Verify Services](#5-verify-services)
+      - [6. Stop the Application](#6-stop-the-application)
+    - [Local Development Setup](#local-development-setup)
+  - [Project Structure](#project-structure)
+  - [Usage Guide](#usage-guide)
+  - [Performance Tips](#performance-tips)
+  - [Inference Benchmarks](#inference-benchmarks)
+  - [Model Capabilities](#model-capabilities)
+    - [GPT-4o](#gpt-4o)
+  - [LLM Provider Configuration](#llm-provider-configuration)
+    - [OpenAI (Recommended for Production)](#openai-recommended-for-production)
+    - [Groq (Fast \& Free Tier)](#groq-fast--free-tier)
+    - [Ollama (Local \& Private)](#ollama-local--private)
+    - [OpenRouter (Multi-Model Access)](#openrouter-multi-model-access)
+    - [Custom OpenAI-Compatible API](#custom-openai-compatible-api)
+    - [Switching Providers](#switching-providers)
+  - [Environment Variables](#environment-variables)
+    - [Core LLM Configuration](#core-llm-configuration)
+    - [Generation Parameters](#generation-parameters)
+    - [File Upload Limits](#file-upload-limits)
+    - [Session Management](#session-management)
+    - [Server Configuration](#server-configuration)
+  - [Technology Stack](#technology-stack)
+    - [Backend](#backend)
+    - [Frontend](#frontend)
+    - [Infrastructure](#infrastructure)
+  - [Troubleshooting](#troubleshooting)
+    - [Quick Debug](#quick-debug)
+  - [License](#license)
+  - [Disclaimer](#disclaimer)
 
 ---
 
 ## Project Overview
 
-**VisiSense - CatalogIQ** is an intelligent visual product analysis platform that processes product images to generate comprehensive retail catalog content with AI-powered vision models, SEO optimization, and an interactive chat interface for product insights.
+**VisiSense - CatalogIQ** demonstrates how multi-provider vision language models can be used to transform product images into comprehensive retail catalog content. It supports multiple vision-capable LLMs and works with any OpenAI-compatible inference endpoint or a locally running Ollama instance.
 
-### How It Works
+This makes VisiSense suitable for:
 
-1. **Image Upload & Analysis**: Users upload 1-5 product images. The system analyzes visual features using state-of-the-art vision models.
-2. **Content Generation**: AI automatically generates SEO-optimized titles, descriptions, feature highlights, and product attributes.
-3. **Quality Scoring**: Real-time SEO quality assessment with actionable recommendations and confidence scoring for each attribute.
-4. **Interactive Chat**: Users can ask questions about products using a natural language chat interface powered by the analyzed product data.
+- **E-commerce platforms** — automatically generate catalog content at scale from product photography
+- **Retail merchandising teams** — standardize product descriptions and maintain SEO quality across SKUs
+- **Air-gapped environments** — run fully offline with Ollama and a locally hosted vision model
+- **Multi-brand operations** — leverage brand recognition and consistent attribute extraction across product lines
+- **Content automation** — reduce manual catalog writing time while maintaining quality and consistency
 
-The platform supports multiple LLM providers (OpenAI, Groq, Ollama, OpenRouter, or any OpenAI-compatible API), allowing teams to choose the best option for their deployment needs. The backend maintains session-based caching for fast chat responses, and provides real-time processing updates via Server-Sent Events.
+---
+
+## How It Works
+
+1. The user uploads 1-5 product images in the browser (drag-and-drop or file selection).
+2. The React frontend sends the images and analysis request to the FastAPI backend.
+3. The backend constructs a structured vision prompt and calls the configured LLM endpoint (remote API or local Ollama).
+4. The vision model analyzes the images and returns structured product data (identity, SEO content, attributes, keywords).
+5. The backend applies SEO scoring and confidence evaluation to the generated content.
+6. Results are stored in the session cache and displayed to the user with real-time status updates.
+7. Users can chat with the product using the analyzed data as context.
+8. Users can export the complete catalog data as JSON for integration with e-commerce systems.
+
+All inference logic is abstracted behind environment configuration — switching between providers requires only a `.env` change and a container restart.
 
 ---
 
 ## Architecture
 
-This application uses a microservices architecture where the React frontend communicates with a FastAPI backend that orchestrates vision analysis, content generation, SEO scoring, and chat functionality. The backend integrates with multiple LLM providers through a universal vision client, enabling flexible deployment options across cloud APIs and local models.
+The application follows a modular two-service architecture with a React frontend and a FastAPI backend. The backend handles all vision analysis orchestration, SEO scoring, confidence evaluation, session management, and chat functionality. The inference layer is fully pluggable — any OpenAI-compatible remote endpoint with vision capabilities or a locally running Ollama instance can be used without any code changes.
+
+### Architecture Diagram
 
 ```mermaid
 graph TB
@@ -101,36 +152,57 @@ graph TB
     style I fill:#e1ffe1
 ```
 
-**Service Components:**
+### Architecture Components
 
-1. **React Web UI (Port 5173)** - Provides drag-and-drop image upload interface, real-time processing status with Server-Sent Events, interactive product data visualization, and chat interface for product Q&A
+**Frontend (React + Vite)**
 
-2. **FastAPI Backend (Port 8000)** - Handles API routing, orchestrates processing services, manages sessions, and serves JSON/SSE responses to the frontend
+- Drag-and-drop multi-image upload with real-time preview and validation
+- Server-Sent Events (SSE) for live processing status and progress updates
+- Structured product data display with confidence scores and SEO quality indicators
+- Interactive chat interface with suggested questions and context-aware responses
+- JSON export functionality for e-commerce system integration
+- Dark mode (default) with `localStorage` persistence
+- Nginx serves the production build and proxies all `/api/` requests to the backend
 
-3. **VLM Service** - Orchestrates vision analysis workflow, coordinates with Vision Client for image analysis, invokes SEO and Confidence scoring, and generates structured product data
+**Backend Services**
 
-4. **Chat Service** - Provides context-aware conversational interface using stored product analysis data from Session Store
+- **API Server** (`main.py`): FastAPI application with CORS middleware, request validation, routing, and health checks
+- **Vision Client** (`services/vision_client.py`): Handles both inference paths — vision analysis for remote endpoints and Ollama chat completions — with multi-provider support
+- **VLM Service** (`services/vlm_service.py`): Orchestrates the complete vision analysis workflow from image processing to structured output
+- **Chat Service** (`services/chat_service.py`): Provides context-aware conversational interface using stored product analysis
+- **SEO Scorer** (`services/seo_scorer.py`): Evaluates content quality and provides actionable recommendations
+- **Confidence Scorer** (`services/confidence_scorer.py`): Assesses attribute extraction confidence based on visual evidence
+- **Session Store** (`services/session_store.py`): In-memory cache with TTL-based expiration for chat sessions and product data
 
-5. **Vision Client** - Universal adapter supporting multiple LLM providers (OpenAI, Groq, Ollama, OpenRouter, custom APIs) for vision analysis and chat generation
+**External Integration**
 
-6. **SEO Scorer** - Evaluates content quality with 0-100% scoring, identifies optimization opportunities, and provides actionable recommendations
+- **Remote inference**: Any OpenAI-compatible vision API (OpenAI GPT-4o, Groq Llama-Vision, OpenRouter, GenAI Gateway)
+- **Local inference**: Ollama running natively on the host machine with vision-capable models (Qwen2.5-VL, LLaVA, Bakllava)
 
-7. **Confidence Scorer** - Evaluates attribute extraction confidence levels based on visual evidence clarity
+### Service Components
 
-8. **Session Store** - In-memory state management with 30-minute TTL for chat sessions and product analysis data
 
-**Typical Flow:**
+| Service    | Container  | Host Port | Description                                                                          |
+| ---------- | ---------- | --------- | ------------------------------------------------------------------------------------ |
+| `backend`  | `backend`  | `8001`    | FastAPI backend — vision analysis, SEO scoring, chat service, session management     |
+| `frontend` | `frontend` | `5173`    | React frontend — served by Nginx, proxies `/api/` to the backend                     |
 
-1. User uploads product images through the web UI
-2. Backend processes images and sends them to the VLM Service
-3. VLM Service requests vision analysis from the Vision Client
-4. Vision Client calls the configured LLM provider (OpenAI, Groq, Ollama, etc.)
-5. LLM provider analyzes images and returns structured product data
-6. VLM Service applies SEO scoring and confidence evaluation
-7. Product analysis is stored in Session Store and returned to the user
-8. User can chat with the product using the Chat Service
-9. Chat Service retrieves context from Session Store and generates responses via Vision Client
-10. Responses are streamed back to the user in real-time
+
+> **Ollama setup note**: For optimal performance with local models, Ollama should run natively on the host. On macOS (Apple Silicon), running Ollama in Docker bypasses Metal GPU (MPS) acceleration. The backend container reaches Ollama via the configured `LLM_BASE_URL`.
+
+### Typical Flow
+
+1. User uploads product images (1-5) through the drag-and-drop interface.
+2. Frontend sends images to backend via `/api/catalog/analyze` endpoint.
+3. Backend validates input and processes images (base64 encoding, size validation).
+4. VLM Service constructs the vision prompt and calls the Vision Client.
+5. Vision Client routes the request to the configured provider (OpenAI, Groq, Ollama, etc.).
+6. Provider's vision model analyzes images and returns structured product data.
+7. Backend applies SEO scoring and confidence evaluation to the response.
+8. Product analysis is stored in Session Store with 30-minute TTL.
+9. Results are streamed back to the user via Server-Sent Events.
+10. User can chat with the product; Chat Service retrieves context and generates responses.
+11. User exports catalog data as JSON for integration with e-commerce systems.
 
 ---
 
@@ -140,70 +212,46 @@ graph TB
 
 Before you begin, ensure you have the following installed and configured:
 
-- **Docker and Docker Compose** (v20.10+)
+- **Docker and Docker Compose** (v2)
   - [Install Docker](https://docs.docker.com/get-docker/)
   - [Install Docker Compose](https://docs.docker.com/compose/install/)
-- **LLM Provider Access** (choose one):
-  - [OpenAI API Key](https://platform.openai.com/account/api-keys) (Recommended)
-  - [Groq API Key](https://console.groq.com/keys) (Fast & Free Tier)
-  - [Ollama Local Installation](https://ollama.com) (Private/Local)
-  - [OpenRouter API Key](https://openrouter.ai/keys) (Multi-Model)
-  - Any OpenAI-compatible API endpoint
+- A vision-capable LLM endpoint — one of:
+  - A remote OpenAI-compatible API key with vision support (OpenAI GPT-4o, Groq Llama-Vision, OpenRouter, or enterprise gateway)
+  - [Ollama](https://ollama.com/download) installed natively on the host machine with a vision model
 
 #### Verify Installation
 
 ```bash
-# Check Docker
 docker --version
 docker compose version
-
-# Verify Docker is running
 docker ps
 ```
 
 ### Quick Start (Docker Deployment)
 
-**Recommended for most users - runs everything in containers**
-
-#### 1. Clone or Navigate to Repository
+#### 1. Clone the Repository
 
 ```bash
-# If cloning:
-git clone  https://github.com/cld2labs/VisiSense.git
+git clone https://github.com/cld2labs/VisiSense.git
 cd VisiSense
 ```
 
-#### 2. Configure Backend Environment
-
-Copy the example configuration and add your API key:
+#### 2. Configure the Environment
 
 ```bash
-# Copy backend environment template
 cp backend/.env.example backend/.env
-
-# Edit the file and add your API key
-nano backend/.env
 ```
 
-Update `backend/.env` with your LLM provider credentials:
+Open `backend/.env` and set `LLM_PROVIDER` plus the corresponding variables for your chosen provider. See [LLM Provider Configuration](#llm-provider-configuration) for per-provider instructions.
+
+#### 3. Build and Start the Application
 
 ```bash
-LLM_PROVIDER=openai
-LLM_API_KEY=your_actual_api_key_here
-LLM_BASE_URL=https://api.openai.com/v1
-LLM_MODEL=gpt-4o
-```
+# Standard (attached)
+docker compose up --build
 
-**For other providers**, see [LLM Provider Configuration](#llm-provider-configuration) section.
-
-#### 3. Launch the Application
-
-```bash
-# Build and start all services
+# Detached (background)
 docker compose up -d --build
-
-# View logs (optional)
-docker compose logs -f
 ```
 
 #### 4. Access the Application
@@ -217,11 +265,24 @@ Once containers are running:
 #### 5. Verify Services
 
 ```bash
-# Check health status
+# Health check
 curl http://localhost:8001/health
 
-# Or use the health check script
-bash scripts/health-check.sh
+# View running containers
+docker compose ps
+```
+
+**View logs:**
+
+```bash
+# All services
+docker compose logs -f
+
+# Backend only
+docker compose logs -f backend
+
+# Frontend only
+docker compose logs -f frontend
 ```
 
 #### 6. Stop the Application
@@ -230,75 +291,30 @@ bash scripts/health-check.sh
 docker compose down
 ```
 
----
-
 ### Local Development Setup
 
-**For developers who want to run services locally without Docker**
+Run the backend and frontend directly on the host without Docker.
 
-#### 1. Prerequisites
-
-- Python 3.11+
-- Node.js 20+
-- Your chosen LLM provider API key
-
-#### 2. Backend Setup
+**Backend (Python / FastAPI)**
 
 ```bash
 cd backend
-
-# Create virtual environment
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
+source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-
-# Configure environment
-cp .env.example .env
-nano .env  # Add your API key
-
-# Start backend
+cp .env.example .env            # configure your .env
 uvicorn main:app --reload --port 8000
 ```
 
-Backend will run on `http://localhost:8000`
-
-#### 3. Frontend Setup
-
-Open a new terminal:
+**Frontend (Node / Vite)**
 
 ```bash
 cd frontend
-
-# Install dependencies
 npm install
-
-# Configure environment for local development
-cp .env.example .env
-
-# Edit .env and set:
-# VITE_API_URL=http://localhost:8000
-nano .env
-
-# Start frontend
 npm run dev
 ```
 
-Frontend will run on `http://localhost:5173`
-
-#### 4. Access the Application
-
-- **Frontend**: http://localhost:5173
-- **Backend API**: http://localhost:8000
-- **API Docs**: http://localhost:8000/docs
-
-**Note**: For local development, the frontend `.env` file **must** contain:
-```bash
-VITE_API_URL=http://localhost:8000
-```
-
-This tells the frontend where to find the backend API.
+The Vite dev server proxies `/api/` to `http://localhost:8000`. Open [http://localhost:5173](http://localhost:5173).
 
 ---
 
@@ -351,56 +367,50 @@ VisiSense/
 
 ## Usage Guide
 
-### Using VisiSense - CatalogIQ
+**Analyze product images:**
 
-1. **Open the Application**
-   - Navigate to `http://localhost:5173`
-
-2. **Upload Product Images**
-   - **Drag & Drop**: Drag 1-5 product images into the upload zone
-   - **Click to Browse**: Click the upload area to select files
-   - **Supported Formats**: JPG, PNG, WEBP (max 10MB each)
-
-3. **Analyze Product**
-   - Click "Analyze Product" button
-   - Watch real-time processing status
-   - Wait for AI analysis to complete
-
-4. **Review Generated Content**
-   - **Product Identity**: Category, subcategory, price positioning
-   - **SEO Content**: Optimized title, short and long descriptions
-   - **SEO Quality Score**: 0-100% score with grade (A, B+, B, C, D)
-   - **Product Attributes**: Material, color, style, finish, etc. with confidence scores
-   - **Feature Highlights**: 5-7 benefit-driven bullet points
-   - **SEO Keywords**: Primary and long-tail keyword suggestions
-   - **SKU Intelligence**: Suggested SKU format and variant signals
-
-5. **SEO Optimization**
-   - Review SEO score and identified issues
-   - Click "Quick Fix" on individual issues for instant improvements
+1. Open the application at [http://localhost:5173](http://localhost:5173).
+2. Drag and drop 1-5 product images into the upload zone (or click to browse).
+3. Supported formats: JPG, PNG, WEBP (max 10MB each).
+4. Click **Analyze Product**.
+5. View real-time processing status via Server-Sent Events.
+6. Review the generated catalog content:
+   - Product identity (category, subcategory, price positioning)
+   - SEO-optimized title and descriptions
+   - SEO quality score (0-100% with grade)
+   - Product attributes with confidence scores
+   - Feature highlights and keywords
+   - SKU intelligence and variant signals
+7. Use the **SEO Optimization** tools:
+   - Click "Quick Fix" for individual issue resolution
    - Use "Auto-Enhance SEO" for comprehensive optimization
    - Click "Regenerate" to rewrite content with custom instructions
 
-6. **Chat with Your Product**
-   - Use suggested questions or ask your own
-   - Get context-aware answers based on product analysis
-   - Examples:
-     - "Who is the target customer for this product?"
-     - "What materials is this made from?"
-     - "What occasions is this suitable for?"
-     - "What are the key selling points?"
+**Chat with your product:**
 
-7. **Export Results**
-   - Click "Export to JSON" button
-   - Save complete product data for your catalog system
+1. After analysis, use the chat interface in the right panel.
+2. Ask questions like:
+   - "Who is the target customer for this product?"
+   - "What materials is this made from?"
+   - "What occasions is this suitable for?"
+3. Get context-aware answers based on the vision analysis.
 
-### Performance Tips
+**Export catalog data:**
 
-- **Multi-Image Analysis**: Upload multiple angles for better accuracy
-- **Clear Images**: Use well-lit, high-resolution product photos
-- **Brand Recognition**: Products with visible branding get better SEO scores
-- **Session Persistence**: Chat sessions expire after 30 minutes of inactivity
-- **Regeneration**: Use specific instructions for better regeneration results
+1. Click **Export to JSON** to download the complete product data.
+2. Integrate with your e-commerce catalog system.
+
+---
+
+## Performance Tips
+
+- **Use multiple images.** Upload 3-5 angles (front, back, detail shots) for higher accuracy and confidence scores.
+- **Provide high-quality images.** Well-lit, high-resolution product photos with visible branding produce better SEO scores.
+- **Lower `TEMPERATURE`** (e.g., `0.2–0.3`) for more deterministic, consistent catalog content. Raise it slightly (e.g., `0.4–0.5`) for more creative descriptions.
+- **Keep sessions under 30 minutes.** Chat sessions expire after inactivity — export your data before timeout.
+- **Use specific regeneration instructions.** When regenerating content, provide clear guidance (e.g., "emphasize luxury positioning" or "focus on eco-friendly materials").
+- **On Apple Silicon**, always run Ollama natively — never inside Docker. The MPS (Metal) GPU backend delivers 5–10x the throughput of CPU-only inference.
+- **For enterprise remote APIs**, choose a vision model with a large context window (≥128k tokens) to handle multi-image analysis without truncation.
 
 ---
 
