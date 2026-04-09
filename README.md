@@ -561,7 +561,7 @@ Configure the application behavior using environment variables in `backend/.env`
 
 ---
 
-## Inference Benchmarks
+## Inference Metrics
 
 The table below compares inference performance for the complete VisiSense catalog generation workflow (averaged over 3 runs with the same product image).
 
@@ -571,7 +571,7 @@ The table below compares inference performance for the complete VisiSense catalo
 
 > **Notes:**
 >
-> - All benchmarks use the actual VisiSense production prompt (~2,678 tokens) and production image processing pipeline.
+> - All metrics use the actual VisiSense production prompt (~2,678 tokens) and production image processing pipeline.
 > - Input tokens include both the prompt and image processing overhead (765 tokens per high-detail image in GPT-4o).
 > - Output tokens represent the complete JSON catalog response with all fields populated (product identity, SEO content, features, attributes, keywords, SKU intelligence).
 > - Token counts are estimated using ~4 characters per token. Actual API token usage may vary slightly.
